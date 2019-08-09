@@ -1,0 +1,16 @@
+# ingnore python chaches files
+*.pyc
+
+# ignore text files
+*.txt
+*.bats
+*.csv
+*.env
+
+# igonore log files
+*.log
+
+.ipynb_checkpoints/
+.project
+*.ipynb
+
