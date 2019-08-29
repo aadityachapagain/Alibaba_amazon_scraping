@@ -13,3 +13,4 @@ AMAZON_SEARCH_TAB = "#twotabsearchtextbox"
 ALIBABA_SEARCH_TAB = "#J_SC_header > header > div.sc-hd-row.sc-hd-main > div.sc-hd-cell.sc-hd-searchbar-wrap > div > div > form > div.ui-searchbar-main > input"
 
 AMAZON_ITEMS_PAGE = "https://www.amazon.com/dp/"
+ALIBABA_ITEMS_PAGE = "https://www.alibaba.com/product-detail/"
