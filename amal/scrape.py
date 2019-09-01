@@ -5,3 +5,7 @@ from selenium.webdriver.common.keys import Keys
 
 class Scraper(object):
     pass
+
+
+class Worker(object):
+    pass
