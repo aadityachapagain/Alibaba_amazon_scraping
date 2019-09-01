@@ -17,3 +17,28 @@ class Client(metaclass= ABCMeta):
     @abstractmethod
     def get_item_code(self, item_name):
         pass
+
+
+class AmazonClient(Client):
+
+    def __init__(self):
+        super().__init__()
+
+    
+    def scrape(self):
+        return super().scrape()
+
+    def get_item_code(self, item_name):
+        return super().get_item_code(item_name)
+
+
+class AlibabaClient(Client):
+
+    def __init__(self):
+        super().__init__()
+
+    def scrape(self):
+        return super().scrape()
+
+    def get_item_code(self, item_name):
+        return super().get_item_code(item_name)
