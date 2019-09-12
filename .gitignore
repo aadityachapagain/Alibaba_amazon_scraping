@@ -2,7 +2,6 @@
 *.pyc
 
 # ignore text files
-*.txt
 *.bats
 *.csv
 *.env
