@@ -31,12 +31,14 @@ class AmazonClient(Client):
         self.ITEM_CODE_TAGS = AMAZON_ITEM_CODE_TAGS
         self.ITEM_PAGE =  AMAZON_ITEMS_PAGE
 
+        self.ITEM_CODES = []
+
     
     def scrape(self):
         return super().scrape()
 
     def get_item_code(self):
-        self._get_item_code()
+        self.ITEM_CODES = self._get_item_code()
 
 
 class AlibabaClient(Client):
@@ -50,8 +52,11 @@ class AlibabaClient(Client):
         self.ITEM_CODE_TAGS = ALIBABA_ITEM_CODE_TAGS
         self.ITEM_PAGE = ALIBABA_ITEMS_PAGE
 
+        self.ITEM_CODES = []
+
+
     def scrape(self):
         return super().scrape()
 
     def get_item_code(self):
-        self._get_item_code()
+        self.ITEM_CODES = self._get_item_code()
