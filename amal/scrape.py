@@ -31,6 +31,10 @@ class Scraper(metaclass=ABCMeta):
                 return False
         return True
 
+    @abstractmethod
+    def scrape_item_info(self, item_code):
+        pass
+
 class AmazonScraper(Scraper):
 
     def __init__(self):
@@ -48,6 +52,9 @@ class AmazonScraper(Scraper):
                     self._item_codes.append(code_)
 
 
+    def scrape_item_info(self, item_code):
+        return super().scrape_item_info(item_code)
+
 
 class AlibabaScraper(Scraper):
 
@@ -62,6 +69,9 @@ class AlibabaScraper(Scraper):
                 code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
                 self._item_codes.append(code_)
 
+
+    def scrape_item_info(self, item_code):
+        return super().scrape_item_info(item_code)
 
 # concept of worker
 # 1 worker is one browser instance of slenium webdriver to paralalize the scraping process
