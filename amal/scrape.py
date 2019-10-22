@@ -6,6 +6,8 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 
 # put all the Dirty works here
+# Don't let the code fool you
+# its always dirty
 
 class Scraper(metaclass=ABCMeta):
 
@@ -33,6 +35,10 @@ class Scraper(metaclass=ABCMeta):
 
     @abstractmethod
     def scrape_item_info(self, item_code):
+        pass
+
+    @abstractmethod
+    def _create_worker(self, url):
         pass
 
 class AmazonScraper(Scraper):
@@ -76,7 +82,13 @@ class AlibabaScraper(Scraper):
 # concept of worker
 # 1 worker is one browser instance of slenium webdriver to paralalize the scraping process
 # Scraper will initiate worker with multiprocessing library
+# proxy options will be built later on
+
 class Worker(object):
     
     def __init__(self, url):
         self._url = url
+        self.options = Options()  
+        self.options.add_argument("--headless")
+
+        _worker = webdriver.Firefox(firefox_options=self.options)
