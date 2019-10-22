@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 # import modules
 from amal.urls import ALIBABA_URL, AMAZON_URL, ALIBABA_SEARCH_TAB, AMAZON_ITEMS_PAGE, ALIBABA_ITEMS_PAGE, AMAZON_SEARCH_TAB
 from amal.urls import AMAZON_ITEM_CODE_TAGS, ALIBABA_ITEM_CODE_TAGS
+from amal.urls import AmazonItemsPaths, AlibabaItemsPaths
 
 class Client(metaclass= ABCMeta):
 
@@ -30,6 +31,7 @@ class AmazonClient(Client):
         self.SEARCH_TAB = AMAZON_SEARCH_TAB
         self.ITEM_CODE_TAGS = AMAZON_ITEM_CODE_TAGS
         self.ITEM_PAGE =  AMAZON_ITEMS_PAGE
+        self.ITEMS_XPATH = AmazonItemsPaths
 
         self.ITEM_CODES = []
 
@@ -51,6 +53,7 @@ class AlibabaClient(Client):
         self.SEARCH_TAB = ALIBABA_SEARCH_TAB
         self.ITEM_CODE_TAGS = ALIBABA_ITEM_CODE_TAGS
         self.ITEM_PAGE = ALIBABA_ITEMS_PAGE
+        self.ITEMS_XPATH = AlibabaItemsPaths
 
         self.ITEM_CODES = []
 
