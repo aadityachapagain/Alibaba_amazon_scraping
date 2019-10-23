@@ -36,4 +36,7 @@ class AmazonItemsPaths:
 
 # Alibaba item page x_path for details
 class AlibabaItemsPaths:
-    pass
+    PRODUCT_X_PATH = '//*[@class="ma-title"]'
+    PRICE_X_PATH = '//*[@class="ma-ref-price"]'
+    PRODUCT_PRICE_RATE_X_PATH = '//*[@class="ma-reference-price"]'
+    PRODUCT_INFO_X_PATH = '//*[@id="J-rich-text-description"]'
