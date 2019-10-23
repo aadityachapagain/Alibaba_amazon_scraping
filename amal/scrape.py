@@ -5,6 +5,12 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import ActionChains
+
 from multiprocessing import Pool
 
 # put all the Dirty works here
@@ -22,6 +28,10 @@ class Scraper(metaclass=ABCMeta):
     def _get_item_code(self):
         browser = webdriver.Firefox(firefox_options=self.options)
         browser.get(self.url)
+        try:
+            myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+        except TimeoutException:
+            print ("Loading took too much time!")
         elem = browser.find_element_by_css_selector(self.SEARCH_TAB)
         elem.send_keys(self.item_name)
         elem.send_keys(Keys.RETURN)
@@ -55,6 +65,10 @@ class AmazonScraper(Scraper):
     def _get_item_code(self):
         browser = super()._get_item_code()
         time.sleep(10)
+        try:
+            myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+        except TimeoutException:
+            print ("Loading took too much time!")
         for elem in browser.find_elements_by_xpath(f'//{self.ITEM_CODE_TAGS["element"]}'):
             result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
             if result_:
@@ -76,8 +90,17 @@ class AlibabaScraper(Scraper):
     def _get_item_code(self):
         browser = super()._get_item_code()
         time.sleep(10)
-        browser.find_element_by_xpath(self.ITEM_CODE_TAGS['refresh']).click()
+        browser.get(self.url)
+        try:
+            myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+        except TimeoutException:
+            print ("Loading took too much time!")
+        
+        elem = browser.find_element_by_xpath(self.ITEM_CODE_TAGS['refresh'])
+        elem.click()
 
+        actions = ActionChains(browser)      
+        actions.key_down(Keys.CONTROL).key_down(Keys.TAB).key_up(Keys.TAB).key_up(Keys.CONTROL).perform()
         # looks like something is wrong with this site
         # lets try with scrolling first and scraping second
         # I think they are trying to prevent scraping by bots
