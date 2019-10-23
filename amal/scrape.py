@@ -15,7 +15,7 @@ class Scraper(metaclass=ABCMeta):
 
     def __init__(self):
         self.options = Options()  
-        self.options.add_argument("--headless")  
+        self.options.add_argument("--headless")
 
 
     @abstractmethod
@@ -35,7 +35,7 @@ class Scraper(metaclass=ABCMeta):
         return True
 
     @abstractmethod
-    def scrape_item_info(self, item_code):
+    def scrape_items_info(self, item_code):
         pass
 
     def _create_worker(self, url):
@@ -63,7 +63,7 @@ class AmazonScraper(Scraper):
                     yield code_
 
 
-    def scrape_item_info(self, item_code):
+    def scrape_items_info(self):
         list_urls = map(lambda x: f'{self.ITEM_PAGE}{x}' ,self.ITEM_CODES)
         with Pool(5) as p:
             item_infos = p.map(self._create_worker, list_urls)
@@ -80,11 +80,12 @@ class AlibabaScraper(Scraper):
             result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
             if result_:
                 code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
-                yield code_
+                yield code_.split('?')[0]
 
 
-    def scrape_item_info(self, item_code):
+    def scrape_items_info(self):
         list_urls = self.ITEM_CODES
+
         with Pool(5) as p:
             item_infos = p.map(self._create_worker, list_urls)
         return item_infos
