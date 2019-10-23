@@ -54,13 +54,12 @@ class AmazonScraper(Scraper):
 
     def _get_item_code(self):
         browser = super()._get_item_code()
+        time.sleep(10)
         for elem in browser.find_elements_by_xpath(f'//{self.ITEM_CODE_TAGS["element"]}'):
             result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
             if result_:
                 code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
-                product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
-                if product is not None:
-                    yield code_
+                yield code_
 
 
     def scrape_items_info(self):
@@ -76,11 +75,25 @@ class AlibabaScraper(Scraper):
 
     def _get_item_code(self):
         browser = super()._get_item_code()
+        time.sleep(10)
+        browser.find_element_by_xpath(self.ITEM_CODE_TAGS['refresh']).click()
+
+        # looks like something is wrong with this site
+        # lets try with scrolling first and scraping second
+        # I think they are trying to prevent scraping by bots
+        # if they dont see anyhuman like interaction
+        # they are freezing dom
+
+        browser.execute_script("window.scrollTo(0, 2900)")
+        time.sleep(10)
+        
         for elem in browser.find_elements_by_xpath(f'//{self.ITEM_CODE_TAGS["element"]}'):
             result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
             if result_:
                 code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
-                yield code_.split('?')[0]
+                product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
+                if product is not None:
+                    yield code_.split('?')[0]
 
 
     def scrape_items_info(self):
