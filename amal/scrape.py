@@ -9,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException , NoSuchElementException
 from selenium.webdriver import ActionChains
 
 from multiprocessing import Pool
@@ -143,10 +143,15 @@ class Worker(object):
         self._worker = webdriver.Firefox(firefox_options=self.options)
 
     def work(self, scraper_pathClass):
-        product = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_X_PATH).text
-        price = self._worker.find_element_by_xpath(scraper_pathClass.PRICE_X_PATH).text
-        rate = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
-        info = self._worker.find_elements_by_xpath(scraper_pathClass.PRODUCT_INFO_X_PATH).text
+        # some of the links might not have the pereferred attributes
+        try:
+            product = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_X_PATH).text
+            price = self._worker.find_element_by_xpath(scraper_pathClass.PRICE_X_PATH).text
+            rate = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
+            info = self._worker.find_elements_by_xpath(scraper_pathClass.PRODUCT_INFO_X_PATH).text
+        except NoSuchElementException as e:
+            print(e)
+            return {'item_name': None, 'price': None, 'rate': None, 'info': None}
 
         return {'item_name': product, 'price': price, 'rate': rate, 'info': info}
 
