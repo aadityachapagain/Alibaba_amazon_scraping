@@ -31,7 +31,7 @@ ALIBABA_ITEM_CODE_TAGS = {"tags": ["data-domdot","data-spm-anchor-id"],
 class AmazonItemsPaths:
     PRODUCT_X_PATH = '//*[@id="productTitle"]'
     PRICE_X_PATH = '//*[@id="priceblock_ourprice"]'
-    PRODUCT_PRICE_RATE_X_PATH = '/html/body/div[2]/div[1]/div[6]/div[5]/div[3]/div[9]/div/div/table/tbody/tr[1]/td[2]/span[2]'
+    PRODUCT_PRICE_RATE_X_PATH = './/span[contains(concat(" ",normalize-space(@class)," ")," a-size-small ")][(count(preceding-sibling::*)+1) = 2]'
     PRODUCT_INFO_X_PATH = '//*[@id="feature-bullets"]/ul'
 
 # Alibaba item page x_path for details
