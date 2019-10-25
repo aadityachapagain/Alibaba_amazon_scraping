@@ -1,5 +1,6 @@
 # import library
 from abc import ABCMeta, abstractmethod
+from selenium.webdriver.firefox.options import Options
 
 # import modules
 from amal.urls import ALIBABA_URL, AMAZON_URL, ALIBABA_SEARCH_TAB, AMAZON_ITEMS_PAGE, ALIBABA_ITEMS_PAGE, AMAZON_SEARCH_TAB
@@ -8,9 +9,10 @@ from amal.urls import AmazonItemsPaths, AlibabaItemsPaths
 
 class Client(metaclass= ABCMeta):
 
-    @abstractmethod
     def __init__(self):
-        pass
+        # options related to the selenium
+        self.options = Options() 
+        self.options.add_argument("--headless")
 
     @abstractmethod
     def scrape(self):
@@ -37,7 +39,7 @@ class AmazonClient(Client):
 
     
     def scrape(self):
-        return super().scrape()
+        return self.scrape_items_info()
 
     def get_item_code(self):
         self.ITEM_CODES = self._get_item_code()
@@ -59,7 +61,7 @@ class AlibabaClient(Client):
 
 
     def scrape(self):
-        return super().scrape()
+        return self.scrape_items_info()
 
     def get_item_code(self):
         self.ITEM_CODES = self._get_item_code()
