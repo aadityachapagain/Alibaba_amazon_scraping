@@ -83,6 +83,11 @@ class AmazonScraper(Scraper):
             item_infos = p.map(self._create_worker, list_urls)
         return item_infos
 
+        # item_infos = []
+        # for link in list_urls:
+        #     item_infos.append(self._create_worker(link))
+        # return item_infos
+
 class AlibabaScraper(Scraper):
 
     def __init__(self):
@@ -137,19 +142,19 @@ class AlibabaScraper(Scraper):
 class Worker(object):
     
     def __init__(self, url):
-        self._url = url
-        self.options = Options()  
+        self.options = Options()
         self.options.add_argument("--headless")
 
         self._worker = webdriver.Firefox(firefox_options=self.options)
+        self._worker.get(url)
 
     def work(self, scraper_pathClass):
         # some of the links might not have the pereferred attributes
         try:
-            product = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_X_PATH).text
-            price = self._worker.find_element_by_xpath(scraper_pathClass.PRICE_X_PATH).text
-            rate = self._worker.find_element_by_xpath(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
-            info = self._worker.find_elements_by_xpath(scraper_pathClass.PRODUCT_INFO_X_PATH).text
+            product = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_X_PATH).text
+            price = self._worker.find_element_by_css_selector(scraper_pathClass.PRICE_X_PATH).text
+            rate = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
+            info = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_INFO_X_PATH).text
         except NoSuchElementException as e:
             print(e)
             return {'item_name': None, 'price': None, 'rate': None, 'info': None}

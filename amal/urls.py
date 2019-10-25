@@ -29,14 +29,14 @@ ALIBABA_ITEM_CODE_TAGS = {"tags": ["data-domdot","data-spm-anchor-id"],
 
 # Amazon item page x_path for details
 class AmazonItemsPaths:
-    PRODUCT_X_PATH = '//*[@id="productTitle"]'
-    PRICE_X_PATH = '//*[@id="priceblock_ourprice"]'
-    PRODUCT_PRICE_RATE_X_PATH = './/span[contains(concat(" ",normalize-space(@class)," ")," a-size-small ")][(count(preceding-sibling::*)+1) = 2]'
-    PRODUCT_INFO_X_PATH = '//*[@id="feature-bullets"]/ul'
+    PRODUCT_X_PATH = '#productTitle'
+    PRICE_X_PATH = '#priceblock_ourprice'
+    PRODUCT_PRICE_RATE_X_PATH = 'td.a-span12 > span:nth-child(2)'
+    PRODUCT_INFO_X_PATH = 'ul.a-spacing-none'
 
 # Alibaba item page x_path for details
 class AlibabaItemsPaths:
-    PRODUCT_X_PATH = '//*[@class="ma-title"]'
-    PRICE_X_PATH = '//*[@class="ma-ref-price"]'
-    PRODUCT_PRICE_RATE_X_PATH = '//*[@class="ma-reference-price"]'
-    PRODUCT_INFO_X_PATH = '//*[@id="J-rich-text-description"]'
+    PRODUCT_X_PATH = '.ma-title'
+    PRICE_X_PATH = '.ma-ref-price'
+    PRODUCT_PRICE_RATE_X_PATH = '.ma-reference-price'
+    PRODUCT_INFO_X_PATH = '#J-rich-text-description'
