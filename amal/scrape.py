@@ -3,7 +3,6 @@ import re
 import time
 
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -21,9 +20,7 @@ from multiprocessing import Pool
 class Scraper(metaclass=ABCMeta):
 
     def __init__(self):
-        self.options = Options()  
-        self.options.add_argument("--headless")
-
+        pass
 
     @abstractmethod
     def _get_item_code(self):
