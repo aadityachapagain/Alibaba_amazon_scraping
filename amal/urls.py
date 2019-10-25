@@ -24,7 +24,7 @@ AMAZON_ITEM_CODE_TAGS = {"tags": ["data-asin"],
 ALIBABA_ITEM_CODE_TAGS = {"tags": ["data-domdot","data-spm-anchor-id"],
                             "value": "href",
                             "element":"a",
-                            "refresh": "/html/body/div[1]/div[2]/div[2]/div[3]/div[1]/div[2]/div[1]/div[2]/div[7]/div[1]/div[10]/a"
+                            "refresh": "/html/body/div[1]/div[2]/div[2]/div[3]/div[1]/div[2]/div[1]/div[2]/div[7]/div[1]/div[10]/a",
                             "regex": re.compile(f"^{ALIBABA_ITEMS_PAGE}.*$")}
 
 # Amazon item page x_path for details
