@@ -73,6 +73,7 @@ class AmazonScraper(Scraper):
                 code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
                 if len(code_):
                     yield code_
+        browser.close()
 
 
     def _scrape_items_info(self):
@@ -116,6 +117,7 @@ class AlibabaScraper(Scraper):
                 product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
                 if product is not None:
                     yield code_.split('?')[0]
+        browser.close()
 
 
     def _scrape_items_info(self):
