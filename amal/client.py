@@ -39,10 +39,10 @@ class AmazonClient(Client):
 
     
     def scrape(self):
-        return self.scrape_items_info()
+        return self._scrape_items_info()
 
     def get_item_code(self):
-        self.ITEM_CODES = self._get_item_code()
+        self.ITEM_CODES = list(self._get_item_code())
 
 
 class AlibabaClient(Client):
@@ -61,7 +61,7 @@ class AlibabaClient(Client):
 
 
     def scrape(self):
-        return self.scrape_items_info()
+        return self._scrape_items_info()
 
     def get_item_code(self):
-        self.ITEM_CODES = self._get_item_code()
+        self.ITEM_CODES = list(self._get_item_code())
