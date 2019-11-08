@@ -63,7 +63,6 @@ class AmazonScraper(Scraper):
 
     def _get_item_code(self):
         browser = super()._get_item_code()
-        time.sleep(10)
         try:
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
         except TimeoutException:
@@ -95,7 +94,6 @@ class AlibabaScraper(Scraper):
 
     def _get_item_code(self):
         browser = super()._get_item_code()
-        time.sleep(10)
         browser.get(self.url)
         try:
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))

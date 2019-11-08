@@ -1,6 +1,6 @@
-# AmaAli (Scraping Amazon and Alibaba)
+# Aliama (Scraping Alibaba and Amazon)
 
-## What is AmaAli ?
+## What is Aliama ?
 
 It is a platform for easy scraping of amazon item price, weight and many more.
 
