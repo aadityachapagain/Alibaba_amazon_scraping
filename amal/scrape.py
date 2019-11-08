@@ -102,7 +102,7 @@ class AlibabaScraper(Scraper):
         except TimeoutException:
             print ("Loading took too much time!")
         
-        elem = browser.find_element_by_xpath(self.ITEM_CODE_TAGS['refresh'])
+        elem = browser.find_element_by_css_selector(self.ITEM_CODE_TAGS['refresh'])
         elem.click()
 
         actions = ActionChains(browser)      
