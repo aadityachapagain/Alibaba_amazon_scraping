@@ -39,7 +39,8 @@ class AmazonClient(Client):
 
     
     def scrape(self):
-        return self._scrape_items_info()
+        scraped_info = self._scrape_items_info()
+        return list(filter(lambda x: x['item_name'] != None, scraped_info))
 
     def get_item_code(self):
         self.ITEM_CODES = list(self._get_item_code())
@@ -61,7 +62,8 @@ class AlibabaClient(Client):
 
 
     def scrape(self):
-        return self._scrape_items_info()
+        scraped_info = self._scrape_items_info()
+        return list(filter(lambda x: x['item_name'] != None, scraped_info))
 
     def get_item_code(self):
         self.ITEM_CODES = list(self._get_item_code())
