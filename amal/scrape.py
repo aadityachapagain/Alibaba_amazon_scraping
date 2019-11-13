@@ -99,9 +99,11 @@ class AlibabaScraper(Scraper):
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
         except TimeoutException:
             print ("Loading took too much time!")
-        
-        elem = browser.find_element_by_css_selector(self.ITEM_CODE_TAGS['refresh'])
-        elem.click()
+        try:
+            elem = browser.find_element_by_css_selector(self.ITEM_CODE_TAGS['refresh'])
+            elem.click()
+        except NoSuchElementException as e:
+            print("didn't found elemnts dom to pass items through !")
 
         actions = ActionChains(browser)      
         actions.key_down(Keys.CONTROL).key_down(Keys.TAB).key_up(Keys.TAB).key_up(Keys.CONTROL).perform()
@@ -148,16 +150,20 @@ class Worker(object):
 
     def work(self, scraper_pathClass):
         # some of the links might not have the pereferred attributes
-        try:
-            product = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_X_PATH).text
-            price = self._worker.find_element_by_css_selector(scraper_pathClass.PRICE_X_PATH).text
-            rate = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
-            info = self._worker.find_element_by_css_selector(scraper_pathClass.PRODUCT_INFO_X_PATH).text
-        except NoSuchElementException as e:
-            print(e)
-            return {'item_name': None, 'price': None, 'rate': None, 'info': None}
+        product = self.find_element_by_css(scraper_pathClass.PRODUCT_X_PATH).text
+        price = self.find_element_by_css(scraper_pathClass.PRICE_X_PATH).text
+        rate = self.find_element_by_css(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
+        info = self.find_element_by_css(scraper_pathClass.PRODUCT_INFO_X_PATH).text
 
         return {'item_name': product, 'price': price, 'rate': rate, 'info': info}
+
+    def find_element_by_css(self, css_selector):
+        try:
+            val = self._worker.find_element_by_css_selector(css_selector).text
+        except NoSuchElementException as e:
+            print(e)
+            val = 'NA'
+        return val
 
     def close(self):
         self._worker.close()
