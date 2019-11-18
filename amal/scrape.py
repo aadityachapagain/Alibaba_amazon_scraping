@@ -11,6 +11,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException , NoSuchElementException
 from selenium.webdriver import ActionChains
+import requests
+from bs4 import BeautifulSoup
 
 from multiprocessing import Pool
 
@@ -26,6 +28,7 @@ class Scraper(metaclass=ABCMeta):
     @abstractmethod
     def _get_item_code(self):
         browser = webdriver.Firefox(firefox_options=self.options)
+
         browser.get(self.url)
         try:
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
@@ -94,35 +97,56 @@ class AlibabaScraper(Scraper):
 
     def _get_item_code(self):
         browser = super()._get_item_code()
-        browser.get(self.url)
-        try:
-            myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
-        except TimeoutException:
-            print ("Loading took too much time!")
-        try:
-            elem = browser.find_element_by_css_selector(self.ITEM_CODE_TAGS['refresh'])
-            elem.click()
-        except NoSuchElementException as e:
-            print("didn't found elemnts dom to pass items through !")
 
-        actions = ActionChains(browser)      
-        actions.key_down(Keys.CONTROL).key_down(Keys.TAB).key_up(Keys.TAB).key_up(Keys.CONTROL).perform()
-        # looks like something is wrong with this site
-        # lets try with scrolling first and scraping second
-        # I think they are trying to prevent scraping by bots
-        # if they dont see anyhuman like interaction
-        # they are freezing dom
-
-        browser.execute_script("window.scrollTo(0, 2900)")
+        # adding sleep time to let page load for atleast 10 sec
         time.sleep(10)
+
+        # try:
+        #     myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+        # except TimeoutException:
+        #     print ("Loading took too much time!")
+        # try:
+        #     elem = browser.find_element_by_css_selector(self.ITEM_CODE_TAGS['refresh'])
+        #     elem.click()
+        # except NoSuchElementException as e:
+        #     print("didn't found elemnts dom to pass items through !")
+
+        # actions = ActionChains(browser)      
+        # actions.key_down(Keys.CONTROL).key_down(Keys.TAB).key_up(Keys.TAB).key_up(Keys.CONTROL).perform()
+        # # looks like something is wrong with this site
+        # # lets try with scrolling first and scraping second
+        # # I think they are trying to prevent scraping by bots
+        # # if they dont see anyhuman like interaction
+        # # they are freezing dom
+
+        # browser.execute_script("window.scrollTo(0, 2900)")
+        # time.sleep(10)
         
-        for elem in browser.find_elements_by_xpath(f'//{self.ITEM_CODE_TAGS["element"]}'):
-            result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
-            if result_:
-                code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
-                product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
-                if product is not None:
-                    yield code_.split('?')[0]
+        # for elem in browser.find_elements_by_xpath(f'//{self.ITEM_CODE_TAGS["element"]}'):
+        #     result_ = self._check_element_tags(self.ITEM_CODE_TAGS["tags"], elem)
+        #     if result_:
+        #         code_ = elem.get_attribute(self.ITEM_CODE_TAGS["value"])
+        #         product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
+        #         if product is not None:
+        #             yield code_.split('?')[0]
+
+        source = browser.page_source
+        soup = BeautifulSoup(source, 'html.parser')
+
+        for tag in soup.find_all('div', {'class':'item-content'}):
+            product = tag.find('h2').find('a', href= True)['href'].split('?')[0]
+            if not product.startswith('http:'):
+                yield 'http:'+product
+            else:
+                yield product
+
+        for tag in soup.find_all('div', {'data-content': 'abox-ProductNormalList'}):
+            product = tag.find('a', href = True)['href'].split('?')[0]
+            if not product.startswith('http:'):
+                yield 'http:'+product
+            else:
+                yield product
+
         browser.close()
 
 
