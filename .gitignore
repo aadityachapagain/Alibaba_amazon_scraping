@@ -1,5 +1,6 @@
 # ingnore python chaches files
 *.pyc
+.mypy_cache/
 
 # ignore text files
 *.bats
