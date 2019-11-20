@@ -4,14 +4,14 @@ import time
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.options import Options as F_options
+from selenium.webdriver.chrome.options import Options as C_options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException , NoSuchElementException
 from selenium.webdriver import ActionChains
-import requests
 from bs4 import BeautifulSoup
 
 from multiprocessing import Pool
@@ -27,7 +27,10 @@ class Scraper(metaclass=ABCMeta):
 
     @abstractmethod
     def _get_item_code(self):
-        browser = webdriver.Firefox(firefox_options=self.options)
+        if self._browser == 'firefox':
+            browser = webdriver.Firefox(firefox_options=self.options)
+        elif self._browser == 'chrome':
+            browser = webdriver.Chrome(chrome_options= self.options)
 
         browser.get(self.url)
         try:
@@ -51,7 +54,7 @@ class Scraper(metaclass=ABCMeta):
         pass
 
     def _create_worker(self, url):
-        worker = Worker(url)
+        worker = Worker(url, self._browser)
         values = worker.work(self.ITEMS_XPATH)
         worker.close()
         del worker
@@ -165,11 +168,19 @@ class AlibabaScraper(Scraper):
 
 class Worker(object):
     
-    def __init__(self, url):
-        self.options = Options()
-        self.options.add_argument("--headless")
+    def __init__(self, url, browser = 'chrome'):
+        if browser == 'chrome':
+            self.options = C_options()
+            self.options.add_argument("log-level=3")
+            self.options.add_argument("--headless")
+            self._worker = webdriver.Chrome(chrome_options= self.options)
 
-        self._worker = webdriver.Firefox(firefox_options=self.options)
+        elif browser == 'firefox':
+            self.options == F_options()
+            self.options.add_argument("log-level=3")
+            self.options.add_argument("--headless")
+            self._worker = webdriver.Firefox(firefox_options= self.options)
+
         self._worker.get(url)
 
     def work(self, scraper_pathClass):

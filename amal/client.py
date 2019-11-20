@@ -1,6 +1,9 @@
 # import library
 from abc import ABCMeta, abstractmethod
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.options import Options as F_options
+from selenium.webdriver.chrome.options import Options as C_options
+from selenium.common.exceptions import UnknownMethodException
+
 
 # import modules
 from amal.urls import ALIBABA_URL, AMAZON_URL, ALIBABA_SEARCH_TAB, AMAZON_ITEMS_PAGE, ALIBABA_ITEMS_PAGE, AMAZON_SEARCH_TAB
@@ -9,10 +12,18 @@ from amal.urls import AmazonItemsPaths, AlibabaItemsPaths
 
 class Client(metaclass= ABCMeta):
 
-    def __init__(self):
+    def __init__(self, browser = 'chrome'):
         # options related to the selenium
-        self.options = Options() 
+        if browser == 'chrome':
+            self.options = C_options()
+        elif browser == 'firefox':
+            self.options == F_options()
+        else:
+            raise UnknownMethodException(f'Wrong browser name {browser}')
+        
+        self.options.add_argument("log-level=3")
         self.options.add_argument("--headless")
+        self._browser = browser
 
     @abstractmethod
     def scrape(self):
@@ -25,7 +36,7 @@ class Client(metaclass= ABCMeta):
 
 class AmazonClient(Client):
 
-    def __init__(self, item_name):
+    def __init__(self, item_name, browser = 'chrome'):
         super().__init__()
         self.url = AMAZON_URL
         self.item_name = item_name
@@ -48,7 +59,7 @@ class AmazonClient(Client):
 
 class AlibabaClient(Client):
 
-    def __init__(self, item_name):
+    def __init__(self, item_name, browser = 'chrome'):
         super().__init__()
         self.url = ALIBABA_URL
         self.item_name = item_name
