@@ -4,6 +4,10 @@ from selenium.webdriver.firefox.options import Options as F_options
 from selenium.webdriver.chrome.options import Options as C_options
 from selenium.common.exceptions import UnknownMethodException
 
+# Using proxy
+from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver.common.proxy import Proxy, ProxyType
+
 
 # import modules
 from amal.urls import ALIBABA_URL, AMAZON_URL, ALIBABA_SEARCH_TAB, AMAZON_ITEMS_PAGE, ALIBABA_ITEMS_PAGE, AMAZON_SEARCH_TAB
@@ -12,8 +16,11 @@ from amal.urls import AmazonItemsPaths, AlibabaItemsPaths
 
 class Client(metaclass= ABCMeta):
 
-    def __init__(self, browser = 'chrome'):
+    def __init__(self, proxy_pool = None,browser = 'chrome'):
         # options related to the selenium
+        if proxy_pool is not None:
+            self._proxy_pool = proxy_pool()
+        self._proxy_pool = None
         if browser == 'chrome':
             self.options = C_options()
         elif browser == 'firefox':
@@ -33,11 +40,25 @@ class Client(metaclass= ABCMeta):
     def get_item_code(self):
         pass
 
+    def _proxy_generator(self):
+        "Randomly generate the deliberate proxy !"
+        if self._browser == 'chrome':
+            _capabilities = DesiredCapabilities.CHROME
+        else:
+            _capabilities = DesiredCapabilities.FIREFOX
+        _proxy = Proxy()
+        _proxy.proxy_type = ProxyType.MANUAL
+        _proxy.http_proxy = next(self._proxy_pool)
+        _proxy.ssl_proxy = next(self._proxy_pool)
+        _proxy.add_to_capabilities(_capabilities)
+
+        return _capabilities
+
 
 class AmazonClient(Client):
 
-    def __init__(self, item_name, browser = 'chrome'):
-        super().__init__()
+    def __init__(self, item_name, proxy_pool = None, browser = 'chrome'):
+        super().__init__(proxy_pool=proxy_pool, browser= browser)
         self.url = AMAZON_URL
         self.item_name = item_name
         self.class_ = "AMAZON"
@@ -59,8 +80,8 @@ class AmazonClient(Client):
 
 class AlibabaClient(Client):
 
-    def __init__(self, item_name, browser = 'chrome'):
-        super().__init__()
+    def __init__(self, item_name, proxy_pool = None, browser = 'chrome'):
+        super().__init__(proxy_pool=proxy_pool, browser= browser)
         self.url = ALIBABA_URL
         self.item_name = item_name
         self.class_ = "ALIBABA"
