@@ -58,6 +58,15 @@ class Client(metaclass= ABCMeta):
 class AmazonClient(Client):
 
     def __init__(self, item_name, proxy_pool = None, browser = 'chrome'):
+        
+        """
+        item_name: Name of item you want to scrape information of
+        proxy_pool: proxy_pool function
+                    user provided function which will randomly generate correct proxy urls
+                    (function must be iterator)
+        browser: --headless browser you want to use to scrape items using
+        """
+
         super().__init__(proxy_pool=proxy_pool, browser= browser)
         self.url = AMAZON_URL
         self.item_name = item_name
@@ -81,6 +90,15 @@ class AmazonClient(Client):
 class AlibabaClient(Client):
 
     def __init__(self, item_name, proxy_pool = None, browser = 'chrome'):
+
+        """
+        item_name: Name of item you want to scrape information of
+        proxy_pool: proxy_pool function
+                    user provided function which will randomly generate correct proxy urls
+                    (function must be iterator)
+        browser: --headless browser you want to use to scrape items using
+        """
+
         super().__init__(proxy_pool=proxy_pool, browser= browser)
         self.url = ALIBABA_URL
         self.item_name = item_name
