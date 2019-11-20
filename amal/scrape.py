@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options as F_options
 from selenium.webdriver.chrome.options import Options as C_options
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -28,9 +29,15 @@ class Scraper(metaclass=ABCMeta):
     @abstractmethod
     def _get_item_code(self):
         if self._browser == 'firefox':
-            browser = webdriver.Firefox(firefox_options=self.options)
+            if self._proxy_pool is not None:
+                browser = webdriver.Firefox(firefox_options=self.options, desired_capabilities=self._proxy_generator())
+            else:
+                browser = webdriver.Firefox(firefox_options=self.options)  
         elif self._browser == 'chrome':
-            browser = webdriver.Chrome(chrome_options= self.options)
+            if self._proxy_pool is not None:
+                browser = webdriver.Chrome(chrome_options= self.options, desired_capabilities=self._proxy_generator)
+            else:
+                browser = webdriver.Chrome(chrome_options= self.options)
 
         browser.get(self.url)
         try:
@@ -54,7 +61,10 @@ class Scraper(metaclass=ABCMeta):
         pass
 
     def _create_worker(self, url):
-        worker = Worker(url, self._browser)
+        if self._proxy_pool is not None:
+            worker = Worker(url, browser = self._browser,capabilites=self.__proxy_generator())
+        else:
+            worker = Worker(url, browser = self._browser)
         values = worker.work(self.ITEMS_XPATH)
         worker.close()
         del worker
@@ -168,18 +178,24 @@ class AlibabaScraper(Scraper):
 
 class Worker(object):
     
-    def __init__(self, url, browser = 'chrome'):
+    def __init__(self, url, browser = 'chrome', capabilites = None):
         if browser == 'chrome':
             self.options = C_options()
             self.options.add_argument("log-level=3")
             self.options.add_argument("--headless")
-            self._worker = webdriver.Chrome(chrome_options= self.options)
+            if capabilites is not None:
+                self._worker = webdriver.Chrome(chrome_options= self.options, desired_capabilities= capabilites)
+            else:
+                self._worker = webdriver.Chrome(chrome_options= self.options)
 
         elif browser == 'firefox':
             self.options == F_options()
             self.options.add_argument("log-level=3")
             self.options.add_argument("--headless")
-            self._worker = webdriver.Firefox(firefox_options= self.options)
+            if capabilites is not None:
+                self._worker = webdriver.Firefox(firefox_options= self.options, desired_capabilities= capabilites)
+            else:
+                self._worker = webdriver.Firefox(firefox_options= self.options)
 
         self._worker.get(url)
 
