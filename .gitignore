@@ -16,3 +16,7 @@
 
 # ignore IDE files here
 .vscode
+
+# ignore image folder and temp files
+captcha/*
+tmp/*
