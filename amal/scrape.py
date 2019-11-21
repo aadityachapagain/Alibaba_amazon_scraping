@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import re
+import os
 import time
 
 from selenium import webdriver
@@ -62,9 +63,9 @@ class Scraper(metaclass=ABCMeta):
 
     def _create_worker(self, url):
         if self._proxy_pool is not None:
-            worker = Worker(url, browser = self._browser,capabilites=self.__proxy_generator())
+            worker = Worker(url, self.options, browser = self._browser,capabilites=self.__proxy_generator())
         else:
-            worker = Worker(url, browser = self._browser)
+            worker = Worker(url, self.options, browser = self._browser)
         values = worker.work(self.ITEMS_XPATH)
         worker.close()
         del worker
@@ -178,20 +179,15 @@ class AlibabaScraper(Scraper):
 
 class Worker(object):
     
-    def __init__(self, url, browser = 'chrome', capabilites = None):
+    def __init__(self, url, options ,browser = 'chrome', capabilites = None):
+        self.options = options
+
         if browser == 'chrome':
-            self.options = C_options()
-            self.options.add_argument("log-level=3")
-            self.options.add_argument("--headless")
             if capabilites is not None:
                 self._worker = webdriver.Chrome(chrome_options= self.options, desired_capabilities= capabilites)
             else:
                 self._worker = webdriver.Chrome(chrome_options= self.options)
-
         elif browser == 'firefox':
-            self.options == F_options()
-            self.options.add_argument("log-level=3")
-            self.options.add_argument("--headless")
             if capabilites is not None:
                 self._worker = webdriver.Firefox(firefox_options= self.options, desired_capabilities= capabilites)
             else:

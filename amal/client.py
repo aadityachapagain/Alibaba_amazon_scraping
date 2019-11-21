@@ -5,6 +5,8 @@ from selenium.webdriver.chrome.options import Options as C_options
 from selenium.common.exceptions import UnknownMethodException
 
 # Using proxy
+import os
+import uuid
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 
@@ -13,6 +15,7 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from amal.urls import ALIBABA_URL, AMAZON_URL, ALIBABA_SEARCH_TAB, AMAZON_ITEMS_PAGE, ALIBABA_ITEMS_PAGE, AMAZON_SEARCH_TAB
 from amal.urls import AMAZON_ITEM_CODE_TAGS, ALIBABA_ITEM_CODE_TAGS
 from amal.urls import AmazonItemsPaths, AlibabaItemsPaths
+from amal.user_agents import random_ua
 
 class Client(metaclass= ABCMeta):
 
@@ -27,9 +30,42 @@ class Client(metaclass= ABCMeta):
             self.options == F_options()
         else:
             raise UnknownMethodException(f'Wrong browser name {browser}')
+
+        self._tmp_folder = '/tmp/{}'.format(uuid.uuid4())
+
+        if not os.path.exists(self._tmp_folder):
+            os.makedirs(self._tmp_folder)
+
+        self.user_data_path = os.path.join(self._tmp_folder, 'user-data/')
+
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+
+        self.data_path = os.path.join(self._tmp_folder, 'data-path/')
+
+        if not os.path.exists(self.data_path):
+            os.makedirs(self.data_path)
+
+        self.cache_dir = os.path.join(self._tmp_folder, 'cache-dir/')
+
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
         
-        self.options.add_argument("log-level=3")
+        self.options.add_argument('--enable-logging')
+        self.options.add_argument("--log-level=3")
         self.options.add_argument("--headless")
+        self.options.add_argument('--no-sandbox')
+        self.options.add_argument('--disable-gpu')
+        self.options.add_argument('--window-size=1280x1696')
+        self.options.add_argument('--user-data-dir={}'.format(self.user_data_path))
+        self.options.add_argument('--hide-scrollbars')
+        self.options.add_argument('--v=99')
+        self.options.add_argument('--single-process')
+        self.options.add_argument('--data-path={}'.format(self.data_path))
+        self.options.add_argument('--ignore-certificate-errors')
+        self.options.add_argument('--homedir={}'.format(self._tmp_folder))
+        self.options.add_argument('--disk-cache-dir={}'.format(self.cache_dir))
+        self.options.add_argument('user-agent={}'.format(random_ua))
         self._browser = browser
 
     @abstractmethod
@@ -58,7 +94,7 @@ class Client(metaclass= ABCMeta):
 class AmazonClient(Client):
 
     def __init__(self, item_name, proxy_pool = None, browser = 'chrome'):
-        
+
         """
         item_name: Name of item you want to scrape information of
         proxy_pool: proxy_pool function
