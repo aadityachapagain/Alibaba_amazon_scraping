@@ -45,6 +45,7 @@ class Scraper(metaclass=ABCMeta):
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
         except TimeoutException:
             print ("Loading took too much time!")
+            # self.check_robot_and_fix_page(browser, )
         elem = browser.find_element_by_css_selector(self.SEARCH_TAB)
         elem.send_keys(self.item_name)
         elem.send_keys(Keys.RETURN)
@@ -59,6 +60,10 @@ class Scraper(metaclass=ABCMeta):
 
     @abstractmethod
     def _scrape_items_info(self, item_code):
+        pass
+
+    @abstractmethod
+    def check_robot_and_fix_page(self, browser):
         pass
 
     def _create_worker(self, url):
@@ -95,14 +100,18 @@ class AmazonScraper(Scraper):
 
     def _scrape_items_info(self):
         list_urls = map(lambda x: f'{self.ITEM_PAGE}{x}' ,self.ITEM_CODES)
-        with Pool(5) as p:
-            item_infos = p.map(self._create_worker, list_urls)
+        # with Pool(5) as p:
+        #     item_infos = p.map(self._create_worker, list_urls)
+        # return item_infos
+
+        item_infos = []
+        for link in list_urls:
+            item_infos.append(self._create_worker(link))
         return item_infos
 
-        # item_infos = []
-        # for link in list_urls:
-        #     item_infos.append(self._create_worker(link))
-        # return item_infos
+    def check_robot_and_fix_page(self, browser):
+        pass
+        
 
 class AlibabaScraper(Scraper):
 
@@ -166,11 +175,17 @@ class AlibabaScraper(Scraper):
 
     def _scrape_items_info(self):
         list_urls = self.ITEM_CODES
+        item_infos = []
+        # with Pool(4) as p:
+        #     item_infos = p.map(self._create_worker, list_urls)
+        for url in list_urls:
+            print('scraping link: ' ,url )
+            item_infos.append(self._create_worker(url))
 
-        with Pool(5) as p:
-            item_infos = p.map(self._create_worker, list_urls)
         return item_infos
 
+    def check_robot_and_fix_page(self, browser):
+        pass
 
 # concept of worker
 # 1 worker is one browser instance of slenium webdriver to paralalize the scraping process
@@ -197,10 +212,10 @@ class Worker(object):
 
     def work(self, scraper_pathClass):
         # some of the links might not have the pereferred attributes
-        product = self.find_element_by_css(scraper_pathClass.PRODUCT_X_PATH).text
-        price = self.find_element_by_css(scraper_pathClass.PRICE_X_PATH).text
-        rate = self.find_element_by_css(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH).text
-        info = self.find_element_by_css(scraper_pathClass.PRODUCT_INFO_X_PATH).text
+        product = self.find_element_by_css(scraper_pathClass.PRODUCT_X_PATH)
+        price = self.find_element_by_css(scraper_pathClass.PRICE_X_PATH)
+        rate = self.find_element_by_css(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH)
+        info = self.find_element_by_css(scraper_pathClass.PRODUCT_INFO_X_PATH)
 
         return {'item_name': product, 'price': price, 'rate': rate, 'info': info}
 
@@ -209,7 +224,7 @@ class Worker(object):
             val = self._worker.find_element_by_css_selector(css_selector).text
         except NoSuchElementException as e:
             print(e)
-            val = 'NA'
+            val = None
         return val
 
     def close(self):
