@@ -23,7 +23,8 @@ class Client(metaclass= ABCMeta):
         # options related to the selenium
         if proxy_pool is not None:
             self._proxy_pool = proxy_pool()
-        self._proxy_pool = None
+        else:
+            self._proxy_pool = None
         if browser == 'chrome':
             self.options = C_options()
         elif browser == 'firefox':

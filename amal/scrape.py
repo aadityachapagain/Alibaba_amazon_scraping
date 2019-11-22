@@ -37,11 +37,13 @@ class Scraper(metaclass=ABCMeta):
     def _get_item_code(self):
         if self._browser == 'firefox':
             if self._proxy_pool is not None:
+                print('using Proxy !')
                 browser = webdriver.Firefox(firefox_options=self.options, desired_capabilities=self._proxy_generator())
             else:
                 browser = webdriver.Firefox(firefox_options=self.options)  
         elif self._browser == 'chrome':
             if self._proxy_pool is not None:
+                print('using Proxy !')
                 browser = webdriver.Chrome(chrome_options= self.options, desired_capabilities=self._proxy_generator)
             else:
                 browser = webdriver.Chrome(chrome_options= self.options)
@@ -74,9 +76,9 @@ class Scraper(metaclass=ABCMeta):
 
     def _create_worker(self, url):
         if self._proxy_pool is not None:
-            worker = Worker(url, browser = self._browser,capabilites=self.__proxy_generator())
+            worker = Worker(url, self.class_, browser = self._browser,capabilites=self._proxy_generator())
         else:
-            worker = Worker(url, browser = self._browser)
+            worker = Worker(url, self.class_, browser = self._browser)
         values = worker.work(self.ITEMS_XPATH)
         worker.close()
         del worker
@@ -219,8 +221,9 @@ class AlibabaScraper(Scraper):
 
 class Worker(object):
     
-    def __init__(self, url ,browser = 'chrome', capabilites = None):
+    def __init__(self, url , target, browser = 'chrome', capabilites = None):
 
+        self._target = target
         if browser == 'chrome':
             self.options = C_options()
             self.create_browser_options()
@@ -289,9 +292,34 @@ class Worker(object):
         try:
             val = self._worker.find_element_by_css_selector(css_selector).text
         except NoSuchElementException as e:
-            print(e)
+            self.robot_check()
             val = None
         return val
+
+    def robot_check(self):
+        if self._target == 'AMAZON':
+            while True:
+                captcha = self._worker.find_element_by_css_selector('div.a-row:nth-child(2) > img:nth-child(1)')
+                if captcha.get_attribute('src'):
+                    print('Robot Detected By Amazon !')
+                    print('captcha link is :', captcha.get_attribute('src'))
+                    captcha_url = captcha.get_attribute('src')
+                    img = Image.open(BytesIO(requests.get(captcha_url).content)).convert('L')
+                    img.save("captcha/captcha.png", "PNG")
+                    print('image saved to the captcha folder as captcha.png file !')
+                    captch_input = input('please look at the catpcha and enter it here !').strip()
+                    captch_elem = self._worker.find_element_by_css_selector('#captchacharacters')
+                    captch_elem.send_keys(captch_input)
+                    captch_elem.send_keys(Keys.RETURN)
+                    time.sleep(5)
+                    try:
+                        myElem = WebDriverWait(self._worker, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+                    except TimeoutException:
+                        print ("Incorrect Captch Try Again !")
+                        continue
+                    break
+        else:
+            pass
 
     def close(self):
         self._worker.close()
