@@ -44,7 +44,7 @@ class Scraper(metaclass=ABCMeta):
         elif self._browser == 'chrome':
             if self._proxy_pool is not None:
                 print('using Proxy !')
-                browser = webdriver.Chrome(chrome_options= self.options, desired_capabilities=self._proxy_generator)
+                browser = webdriver.Chrome(chrome_options= self.options, desired_capabilities=self._proxy_generator())
             else:
                 browser = webdriver.Chrome(chrome_options= self.options)
 
