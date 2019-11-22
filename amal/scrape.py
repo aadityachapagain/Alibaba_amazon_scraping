@@ -8,6 +8,7 @@ from io import BytesIO
 import numpy as np
 import sys
 from amal.user_agents import random_ua
+import uuid
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -114,6 +115,7 @@ class AmazonScraper(Scraper):
 
         item_infos = []
         for link in list_urls:
+            print('scraping link: ' ,link )
             item_infos.append(self._create_worker(link))
         return item_infos
 
@@ -206,7 +208,7 @@ class AlibabaScraper(Scraper):
         # with Pool(4) as p:
         #     item_infos = p.map(self._create_worker, list_urls)
         for url in list_urls:
-            print('scraping link: ' ,url )
+            print('scraping link: ' ,url)
             item_infos.append(self._create_worker(url))
 
         return item_infos
@@ -280,7 +282,13 @@ class Worker(object):
 
 
     def work(self, scraper_pathClass):
+        # check for the captch here
+        if self._target == 'AMAZON':
+            self.robot_check_amazon()
+        else:
+            self.robot_check_alibaba()
         # some of the links might not have the pereferred attributes
+
         product = self.find_element_by_css(scraper_pathClass.PRODUCT_X_PATH)
         price = self.find_element_by_css(scraper_pathClass.PRICE_X_PATH)
         rate = self.find_element_by_css(scraper_pathClass.PRODUCT_PRICE_RATE_X_PATH)
@@ -292,34 +300,37 @@ class Worker(object):
         try:
             val = self._worker.find_element_by_css_selector(css_selector).text
         except NoSuchElementException as e:
-            self.robot_check()
             val = None
         return val
 
-    def robot_check(self):
-        if self._target == 'AMAZON':
-            while True:
+    def robot_check_amazon(self):
+        while True:
+            try:
                 captcha = self._worker.find_element_by_css_selector('div.a-row:nth-child(2) > img:nth-child(1)')
-                if captcha.get_attribute('src'):
-                    print('Robot Detected By Amazon !')
-                    print('captcha link is :', captcha.get_attribute('src'))
-                    captcha_url = captcha.get_attribute('src')
-                    img = Image.open(BytesIO(requests.get(captcha_url).content)).convert('L')
-                    img.save("captcha/captcha.png", "PNG")
-                    print('image saved to the captcha folder as captcha.png file !')
-                    captch_input = input('please look at the catpcha and enter it here !').strip()
-                    captch_elem = self._worker.find_element_by_css_selector('#captchacharacters')
-                    captch_elem.send_keys(captch_input)
-                    captch_elem.send_keys(Keys.RETURN)
-                    time.sleep(5)
-                    try:
-                        myElem = WebDriverWait(self._worker, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
-                    except TimeoutException:
-                        print ("Incorrect Captch Try Again !")
-                        continue
-                    break
-        else:
-            pass
+            except:
+                print('No Captcha Niceeee ....')
+                return
+            if captcha.get_attribute('src'):
+                print('Robot Detected By Amazon !')
+                print('captcha link is :', captcha.get_attribute('src'))
+                captcha_url = captcha.get_attribute('src')
+                img = Image.open(BytesIO(requests.get(captcha_url).content)).convert('L')
+                img.save("captcha/captcha.png", "PNG")
+                print('image saved to the captcha folder as captcha.png file !')
+                captch_input = input('please look at the catpcha and enter it here !').strip()
+                captch_elem = self._worker.find_element_by_css_selector('#captchacharacters')
+                captch_elem.send_keys(captch_input)
+                captch_elem.send_keys(Keys.RETURN)
+                time.sleep(5)
+                try:
+                    myElem = WebDriverWait(self._worker, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#twotabsearchtextbox')))
+                    return
+                except TimeoutException:
+                    print ("Incorrect Captch Try Again !")
+                    continue
+
+    def robot_check_alibaba(self):
+        pass
 
     def close(self):
         self._worker.close()
