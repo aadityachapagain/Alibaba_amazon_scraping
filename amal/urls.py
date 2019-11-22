@@ -33,6 +33,8 @@ class AmazonItemsPaths:
     PRICE_X_PATH = '#priceblock_ourprice'
     PRODUCT_PRICE_RATE_X_PATH = '#priceblock_ourprice_row > td.a-span12 > span.a-size-small.a-color-price'
     PRODUCT_INFO_X_PATH = 'ul.a-spacing-none'
+    CAPTCHA = 'div.a-row:nth-child(2) > img:nth-child(1)'
+    CAPTCHA_INPUT = '#captchacharacters'
 
 # Alibaba item page x_path for details
 class AlibabaItemsPaths:

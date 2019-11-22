@@ -2,6 +2,12 @@ from abc import ABCMeta, abstractmethod
 import re
 import os
 import time
+from PIL import Image
+import requests
+from io import BytesIO
+import numpy as np
+import sys
+from amal.user_agents import random_ua
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -45,7 +51,7 @@ class Scraper(metaclass=ABCMeta):
             myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
         except TimeoutException:
             print ("Loading took too much time!")
-            # self.check_robot_and_fix_page(browser, )
+            browser = self.check_robot_and_fix_page(browser)
         elem = browser.find_element_by_css_selector(self.SEARCH_TAB)
         elem.send_keys(self.item_name)
         elem.send_keys(Keys.RETURN)
@@ -68,9 +74,9 @@ class Scraper(metaclass=ABCMeta):
 
     def _create_worker(self, url):
         if self._proxy_pool is not None:
-            worker = Worker(url, self.options, browser = self._browser,capabilites=self.__proxy_generator())
+            worker = Worker(url, browser = self._browser,capabilites=self.__proxy_generator())
         else:
-            worker = Worker(url, self.options, browser = self._browser)
+            worker = Worker(url, browser = self._browser)
         values = worker.work(self.ITEMS_XPATH)
         worker.close()
         del worker
@@ -110,8 +116,27 @@ class AmazonScraper(Scraper):
         return item_infos
 
     def check_robot_and_fix_page(self, browser):
-        pass
-        
+        while True:
+            captcha = browser.find_element_by_css_selector(self.ITEMS_XPATH.CAPTCHA)
+            if captcha.get_attribute('src'):
+                print('Robot Detected By Amazon !')
+                print('captcha link is :', captcha.get_attribute('src'))
+                captcha_url = captcha.get_attribute('src')
+                img = Image.open(BytesIO(requests.get(captcha_url).content)).convert('L')
+                img.save("captcha/captcha.png", "PNG")
+                print('image saved to the captcha folder as captcha.png file !')
+                captch_input = input('please look at the catpcha and enter it here !').strip()
+                captch_elem = browser.find_element_by_css_selector(self.ITEMS_XPATH.CAPTCHA_INPUT)
+                captch_elem.send_keys(captch_input)
+                captch_elem.send_keys(Keys.RETURN)
+                time.sleep(5)
+                try:
+                    myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
+                except TimeoutException:
+                    print ("Incorrect Captch Try Again !")
+                    continue
+                return browser
+
 
 class AlibabaScraper(Scraper):
 
@@ -194,21 +219,62 @@ class AlibabaScraper(Scraper):
 
 class Worker(object):
     
-    def __init__(self, url, options ,browser = 'chrome', capabilites = None):
-        self.options = options
+    def __init__(self, url ,browser = 'chrome', capabilites = None):
 
         if browser == 'chrome':
+            self.options = C_options()
+            self.create_browser_options()
             if capabilites is not None:
                 self._worker = webdriver.Chrome(chrome_options= self.options, desired_capabilities= capabilites)
             else:
                 self._worker = webdriver.Chrome(chrome_options= self.options)
         elif browser == 'firefox':
+            self.options = F_options()
+            self.create_browser_options()
             if capabilites is not None:
                 self._worker = webdriver.Firefox(firefox_options= self.options, desired_capabilities= capabilites)
             else:
                 self._worker = webdriver.Firefox(firefox_options= self.options)
 
         self._worker.get(url)
+
+    def create_browser_options(self):
+        self._tmp_folder = '/tmp/{}'.format(uuid.uuid4())
+
+        if not os.path.exists(self._tmp_folder):
+            os.makedirs(self._tmp_folder)
+
+        self.user_data_path = os.path.join(self._tmp_folder, 'user-data/')
+
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+
+        self.data_path = os.path.join(self._tmp_folder, 'data-path/')
+
+        if not os.path.exists(self.data_path):
+            os.makedirs(self.data_path)
+
+        self.cache_dir = os.path.join(self._tmp_folder, 'cache-dir/')
+
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+        
+        self.options.add_argument('--enable-logging')
+        self.options.add_argument("--log-level=3")
+        self.options.add_argument("--headless")
+        self.options.add_argument('--no-sandbox')
+        self.options.add_argument('--disable-gpu')
+        self.options.add_argument('--window-size=1280x1696')
+        self.options.add_argument('--user-data-dir={}'.format(self.user_data_path))
+        self.options.add_argument('--hide-scrollbars')
+        self.options.add_argument('--v=99')
+        self.options.add_argument('--single-process')
+        self.options.add_argument('--data-path={}'.format(self.data_path))
+        self.options.add_argument('--ignore-certificate-errors')
+        self.options.add_argument('--homedir={}'.format(self._tmp_folder))
+        self.options.add_argument('--disk-cache-dir={}'.format(self.cache_dir))
+        self.options.add_argument('user-agent={}'.format(random_ua))
+
 
     def work(self, scraper_pathClass):
         # some of the links might not have the pereferred attributes
