@@ -133,7 +133,7 @@ class AmazonScraper(Scraper):
                 captch_elem = browser.find_element_by_css_selector(self.ITEMS_XPATH.CAPTCHA_INPUT)
                 captch_elem.send_keys(captch_input)
                 captch_elem.send_keys(Keys.RETURN)
-                time.sleep(5)
+                # time.sleep(5)
                 try:
                     myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
                 except TimeoutException:
@@ -151,7 +151,7 @@ class AlibabaScraper(Scraper):
         browser = super()._get_item_code()
 
         # adding sleep time to let page load for atleast 10 sec
-        time.sleep(10)
+        # time.sleep(10)
 
         # try:
         #     myElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, self.SEARCH_TAB)))
@@ -321,7 +321,7 @@ class Worker(object):
                 captch_elem = self._worker.find_element_by_css_selector('#captchacharacters')
                 captch_elem.send_keys(captch_input)
                 captch_elem.send_keys(Keys.RETURN)
-                time.sleep(5)
+                # time.sleep(5)
                 try:
                     myElem = WebDriverWait(self._worker, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#twotabsearchtextbox')))
                     return
