@@ -19,7 +19,7 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException , NoSuchElementException
+from selenium.common.exceptions import TimeoutException , NoSuchElementException, UnexpectedAlertPresentException
 from selenium.webdriver import ActionChains
 from bs4 import BeautifulSoup
 
@@ -181,8 +181,10 @@ class AlibabaScraper(Scraper):
         #         product = re.compile(f"^{self.ITEM_PAGE}.*$").match(code_)
         #         if product is not None:
         #             yield code_.split('?')[0]
-
-        source = browser.page_source
+        try:
+            source = browser.page_source
+        except UnexpectedAlertPresentException:
+            print("didn't found the page source skipping")
         soup = BeautifulSoup(source, 'html.parser')
 
         for tag in soup.find_all('div', {'class':'item-content'}):
