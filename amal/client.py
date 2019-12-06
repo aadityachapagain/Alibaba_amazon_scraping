@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from selenium.webdriver.firefox.options import Options as F_options
 from selenium.webdriver.chrome.options import Options as C_options
-from selenium.common.exceptions import UnknownMethodException
+from selenium.common.exceptions import UnknownMethodException, UnexpectedAlertPresentException
 
 # Using proxy
 import os
@@ -153,4 +153,8 @@ class AlibabaClient(Client):
         return list(filter(lambda x: x['item_name'] != None, scraped_info))
 
     def get_item_code(self):
-        self.ITEM_CODES = list(self._get_item_code())
+        try:
+            self.ITEM_CODES = list(self._get_item_code())
+        except UnexpectedAlertPresentException:
+            print("didn't found the page source skipping")
+            self.ITEM_CODES = []
